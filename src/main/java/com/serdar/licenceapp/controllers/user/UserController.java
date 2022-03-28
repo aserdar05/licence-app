@@ -7,11 +7,7 @@ import com.serdar.licenceapp.converter.UserConverter;
 import com.serdar.licenceapp.domain.User;
 import com.serdar.licenceapp.services.UserServiceImp;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -47,12 +43,12 @@ public class UserController {
     }
 
     @PostMapping("/SaveUser")
-    public ResponseCommand saveUser(UserCommand userCommand){
+    public ResponseCommand saveUser(@RequestBody UserCommand userCommand){
         boolean succeeded = this.userService.saveUser(userCommand);
         ResponseCommand command = new ResponseCommand();
         command.setSuccessfull(succeeded);
         if(succeeded){
-            command.setResponseMessage("User " + userCommand.getEmail() + " saved successfully");
+            command.setResponseMessage("User '" + userCommand.getEmail() + "' saved successfully");
         }else{
             command.setResponseMessage("User could not be saved");
         }

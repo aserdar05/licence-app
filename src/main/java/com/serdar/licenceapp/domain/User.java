@@ -1,12 +1,10 @@
 package com.serdar.licenceapp.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 @Getter
@@ -14,7 +12,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class User {
+public class User implements Serializable {
+    private static final long serialVersionUID = -4439114469417994311L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +25,7 @@ public class User {
     private Date birthDate;
     private Date createDate;
     private Date updateDate;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Project project;
 
 }

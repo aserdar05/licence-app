@@ -13,4 +13,5 @@ public interface UserService {
     boolean saveUser(UserCommand command);
     User GetUserById(Long userId);
     List<User> GetUsers(Sort sort);
+    void deleteUser(Long userId);
 }
