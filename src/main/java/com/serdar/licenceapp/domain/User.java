@@ -25,6 +25,7 @@ public class User implements Serializable {
     private Date birthDate;
     private Date createDate;
     private Date updateDate;
+    private Role role;
     @ManyToOne(fetch = FetchType.LAZY)
     private Project project;
 

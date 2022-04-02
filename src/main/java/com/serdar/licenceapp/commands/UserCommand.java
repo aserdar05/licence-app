@@ -1,5 +1,6 @@
 package com.serdar.licenceapp.commands;
 
+import com.serdar.licenceapp.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class UserCommand {
     private String password;
     private String name;
     private String surname;
+    private Role role;
     private Date birthDate;
     private Long projectId;
 }

@@ -14,13 +14,10 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestBody;
 
-import java.awt.print.Pageable;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 
 @Slf4j
@@ -65,6 +62,7 @@ public class UserServiceImp implements UserService{
             User user = null;
             if(userId == null){
                 user = userConverter.ConvertToUser(command);
+                user.setCreateDate(new Date());
             }else{
                 user = userRepository.findById(userId).
                         orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -72,6 +70,7 @@ public class UserServiceImp implements UserService{
                 user.setPassword(command.getPassword());
                 user.setName(command.getName());
                 user.setSurname(command.getSurname());
+                user.setRole(command.getRole());
             }
 
             user.setUpdateDate(new Date());
@@ -94,19 +93,30 @@ public class UserServiceImp implements UserService{
     // @CacheEvict(value="Invoice", allEntries=true) //in case there are multiple entires to delete
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Invoice Not Found"));
+                .orElseThrow(() -> new UserNotFoundException("User Not Found"));
         userRepository.delete(user);
     }
 
     @Override
     @Cacheable(value = "userCache", key="#userId")
-    public User GetUserById(Long userId) {
+    public User getUserById(Long userId) {
         return this.userRepository.findById(userId).orElse(null);
     }
 
     @Override
+    @Cacheable(value = "userCache", key="#email")
+    public User getUserByEmail(String email) {
+        return this.userRepository.findByEmail(email).orElse(null);
+    }
+
+    @Override
+    public User getUserByEmailAndPassword(String email, String password) {
+        return this.userRepository.findByEmailAndPassword(email, password).orElse(null);
+    }
+
+    @Override
     @Cacheable(value="userCache")
-    public List<User> GetUsers(Sort sort) {
+    public List<User> getUsers(Sort sort) {
         if(sort == null){
             return this.userRepository.findAll();
         }

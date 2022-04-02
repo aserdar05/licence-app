@@ -5,6 +5,7 @@ import com.serdar.licenceapp.commands.ResponseCommand;
 import com.serdar.licenceapp.commands.UserCommand;
 import com.serdar.licenceapp.converter.UserConverter;
 import com.serdar.licenceapp.domain.User;
+import com.serdar.licenceapp.services.UserService;
 import com.serdar.licenceapp.services.UserServiceImp;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +14,10 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping(value = {"/user"})
 public class UserController {
-    private final UserServiceImp userService;
+    private final UserService userService;
     private final UserConverter userConverter;
 
-    public UserController(UserServiceImp userService, UserConverter userConverter) {
+    public UserController(UserService userService, UserConverter userConverter) {
         this.userService = userService;
         this.userConverter = userConverter;
     }
@@ -35,23 +36,10 @@ public class UserController {
 
     @GetMapping("/GetUser/{id}")
     public UserCommand GetUser(@PathVariable Long id){
-        User user = this.userService.GetUserById(id);
+        User user = this.userService.getUserById(id);
         if(user == null){
             return null;
         }
         return userConverter.ConvertToUserCommand(user);
-    }
-
-    @PostMapping("/SaveUser")
-    public ResponseCommand saveUser(@RequestBody UserCommand userCommand){
-        boolean succeeded = this.userService.saveUser(userCommand);
-        ResponseCommand command = new ResponseCommand();
-        command.setSuccessfull(succeeded);
-        if(succeeded){
-            command.setResponseMessage("User '" + userCommand.getEmail() + "' saved successfully");
-        }else{
-            command.setResponseMessage("User could not be saved");
-        }
-        return command;
     }
 }

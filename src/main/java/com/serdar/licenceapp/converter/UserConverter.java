@@ -25,6 +25,7 @@ public class UserConverter {
         user.setEmail(command.getEmail());
         user.setPassword(command.getPassword());
         user.setBirthDate(command.getBirthDate());
+        user.setRole(command.getRole());
         return user;
     }
 }
