@@ -28,5 +28,8 @@ public class User implements Serializable {
     private Role role;
     @ManyToOne(fetch = FetchType.LAZY)
     private Project project;
+    //Not persistent. There is no column on database table.
+    @Transient
+    private String token;
 
 }

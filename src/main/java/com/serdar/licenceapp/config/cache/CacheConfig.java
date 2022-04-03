@@ -1,4 +1,4 @@
-package com.serdar.licenceapp.caching.redis;
+package com.serdar.licenceapp.config.cache;
 
 import com.serdar.licenceapp.domain.User;
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;

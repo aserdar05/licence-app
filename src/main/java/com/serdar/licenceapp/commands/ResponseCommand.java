@@ -12,4 +12,5 @@ import lombok.Setter;
 public class ResponseCommand {
     private boolean isSuccessfull;
     private String responseMessage;
+    private int responseCode;
 }

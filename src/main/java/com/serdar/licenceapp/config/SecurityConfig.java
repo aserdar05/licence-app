@@ -1,5 +1,8 @@
-package com.serdar.licenceapp.security;
+package com.serdar.licenceapp.config;
 
+import com.serdar.licenceapp.security.UserAuthenticationProvider;
+import com.serdar.licenceapp.security.jwt.JWTAuthorizationFilter;
+import com.serdar.licenceapp.security.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,18 +11,25 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 
-@EnableWebSecurity
+@EnableWebSecurity//Spring boot application does not require this annotation
 @Configuration
 @ComponentScan("com.serdar.licenceapp.security")
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    @Autowired
-    private LicenseUserDetailsService licenseUserDetailService;
+//    @Autowired
+//    private LicenseUserDetailsService licenseUserDetailService;
     @Autowired
     private UserAuthenticationProvider authenticationProvider;
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -48,15 +58,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         //3- Regex matchers
         http.csrf().disable().//Disables csrf attack configurations
                 authorizeRequests().
-                mvcMatchers("/home").permitAll().
-                mvcMatchers("/user/**").authenticated().
-                mvcMatchers("/admin/**").hasRole("ADMIN").
+                mvcMatchers("/api/home/**").permitAll().
+                mvcMatchers("/api/user/**").hasRole("USER").
+                mvcMatchers("/api/admin/**").hasRole("ADMIN").
                 and().formLogin().
                 //loginPage("/login"). Define the login page
                 // defaultSuccessUrl("/dashboard")
                 //failureUrl("/login?error=true").permitAll()//Define permit url and permit the failure url
-                and().logout().logoutSuccessUrl("/login?logout=true").invalidateHttpSession(true).
+                        and().logout().logoutSuccessUrl("/login?logout=true").invalidateHttpSession(true).
                 and().httpBasic();
+        //jwt filter
+        http.addFilter(new JWTAuthorizationFilter(authenticationManager(),jwtTokenProvider));
     }
 
     @Override
@@ -68,6 +80,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean
     public PasswordEncoder getPasswordEncoder(){
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
+    }
+
+    //Cross origin resource sharing.
+    @Bean
+    public WebMvcConfigurer corsConfigurer(){
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**").allowedOrigins("*").allowedMethods("*");
+            }
+        };
     }
 }

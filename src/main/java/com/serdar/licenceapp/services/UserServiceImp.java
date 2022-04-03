@@ -8,10 +8,13 @@ import com.serdar.licenceapp.domain.User;
 import com.serdar.licenceapp.exception.UserNotFoundException;
 import com.serdar.licenceapp.repositories.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +28,8 @@ import java.util.Optional;
 public class UserServiceImp implements UserService{
     private final UserRepository userRepository;
     private final UserConverter userConverter;
+    //@Autowired
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserServiceImp(UserRepository userRepository, UserConverter userConverter) {
         this.userRepository = userRepository;
@@ -39,7 +44,7 @@ public class UserServiceImp implements UserService{
             Optional<User> userOptional = userRepository.findByEmail(command.getUserEmail());
             if(userOptional.isPresent()){
                 User user = userOptional.get();
-                user.setPassword(command.getPassword());
+                user.setPassword(passwordEncoder.encode(command.getPassword()));
                 userRepository.save(user);
             }
             else{
@@ -79,6 +84,7 @@ public class UserServiceImp implements UserService{
                 project.setId(command.getProjectId());
                 user.setProject(project);
             }
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             userRepository.save(user);
         }catch(Exception e){
             log.error("Error occurred", e);
@@ -107,11 +113,6 @@ public class UserServiceImp implements UserService{
     @Cacheable(value = "userCache", key="#email")
     public User getUserByEmail(String email) {
         return this.userRepository.findByEmail(email).orElse(null);
-    }
-
-    @Override
-    public User getUserByEmailAndPassword(String email, String password) {
-        return this.userRepository.findByEmailAndPassword(email, password).orElse(null);
     }
 
     @Override

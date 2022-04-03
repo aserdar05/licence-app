@@ -15,8 +15,6 @@ public interface UserService {
     boolean saveUser(UserCommand command);
     User getUserById(Long userId);
     User getUserByEmail(String email);
-
-    User getUserByEmailAndPassword(String email, String password);
     List<User> getUsers(Sort sort);
     void deleteUser(Long userId);
 }

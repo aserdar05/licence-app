@@ -2,31 +2,52 @@ package com.serdar.licenceapp.controllers;
 
 import com.serdar.licenceapp.commands.ResponseCommand;
 import com.serdar.licenceapp.commands.UserCommand;
+import com.serdar.licenceapp.domain.User;
+import com.serdar.licenceapp.security.jwt.JwtTokenProvider;
 import com.serdar.licenceapp.services.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.security.Principal;
 
 @RestController
-@RequestMapping(value = {"/home", "/", ""})
+@RequestMapping(value = "/api/home")
+@CrossOrigin(origins = "*")
 public class HomeController {
     private final UserService userService;
+    @Autowired
+    private JwtTokenProvider tokenProvider;
 
     public HomeController(UserService userService) {
         this.userService = userService;
     }
 
-    @RequestMapping("/login")
-    public ResponseCommand login(UserCommand userInfo){
-        ResponseCommand response = new ResponseCommand();
 
+    @GetMapping("/login")
+    public ResponseEntity<?> login(Principal principal){
+        //principal = httpServletRequest.getUserPrincipal.
+        if(principal == null){
+            //logout will also use here so we should return ok http status.
+            return ResponseEntity.ok(principal);
+        }
+        UsernamePasswordAuthenticationToken authenticationToken =
+                (UsernamePasswordAuthenticationToken) principal;
+        User user = userService.getUserByEmail(authenticationToken.getName());
+        user.setToken(tokenProvider.generateToken(authenticationToken));
+
+        ResponseCommand response = new ResponseCommand();
         response.setSuccessfull(true);
         response.setResponseMessage("User logged in successfully");
-        return response;
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PostMapping("/signup")
